@@ -33,9 +33,13 @@ func d(s1 []int, s2 []int) int {
 		if i > l2 {
 			dist += s1[i]
 		} else {
-			res := int(math.Abs(float64(s1[i] - s2[i])))
+			res := IntAbs(s1[i] - s2[i])
 			dist += res
 		}
 	}
 	return dist
+}
+
+func IntAbs(i int) int {
+	return int(math.Abs(float64(i)))
 }
