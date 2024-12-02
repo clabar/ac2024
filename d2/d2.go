@@ -21,10 +21,35 @@ const (
 
 func SafetyCheck(lines [][]int) map[int]Safe {
 	res := make(map[int]Safe, len(lines))
-	for i, line := range lines {
+	for i := 0; i < len(lines); i++ {
+		line := lines[i]
 		res[i] = isSliceSafe(line)
+		if res[i] == u {
+			res[i] = safe2(line)
+		}
 	}
 	return res
+}
+
+func safe2(line []int) Safe {
+	for j := 0; j < len(line); j++ {
+		ns := isSliceSafe(remove(line, j))
+		if ns == s {
+			return s
+		}
+	}
+	return u
+}
+
+func remove(slice []int, s int) []int {
+	ints := make([]int, 0)
+	for i := 0; i < len(slice); i++ {
+		if i == s {
+			continue
+		}
+		ints = append(ints, slice[i])
+	}
+	return ints
 }
 
 func isSliceSafe(line []int) (res Safe) {
