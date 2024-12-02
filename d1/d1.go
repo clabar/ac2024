@@ -90,7 +90,7 @@ func SecondCol(both [][]int) (res []int) {
 	return
 }
 
-func Doit() int {
+func Doit() (int, int) {
 	fi, err := os.Open("../d1/input1.txt")
 	if err != nil {
 		panic(err)
@@ -102,5 +102,28 @@ func Doit() int {
 		}
 	}()
 	input := ParseInput(fi)
-	return ComputeDistance(FirstCol(input), SecondCol(input))
+	l1 := FirstCol(input)
+	l2 := SecondCol(input)
+	distance := ComputeDistance(l1, l2)
+	score := Score(l1, l2)
+	return distance, score
+}
+
+func Score(s1, s2 []int) int {
+	score := 0
+	for i := 0; i < len(s1); i++ {
+		e := s1[i]
+		c := Count(e, s2)
+		score += e * c
+	}
+	return score
+}
+func Count(e int, s []int) int {
+	count := 0
+	for i := 0; i < len(s); i++ {
+		if s[i] == e {
+			count += 1
+		}
+	}
+	return count
 }
