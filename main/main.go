@@ -6,6 +6,7 @@ import (
 
 	"bartoli.no/d1"
 	"bartoli.no/d2"
+	"bartoli.no/d3"
 )
 
 func main() {
@@ -25,4 +26,8 @@ func main() {
 		}
 	}()
 	fmt.Println(d2.CountSafe(d2.SafetyCheck(d2.ParseInput(fi))))
+
+	fmt.Println(d3.ParseAll("xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"))
+	//fmt.Println(d3.ParseAll(d3.Input))
+
 }
