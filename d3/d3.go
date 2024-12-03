@@ -39,10 +39,17 @@ func ParseAll(input string) int {
 	}
 
 	res := 0
+	skip := false
 	for i := 0; i < len(nodes); i++ {
-		fmt.Println(fmt.Sprintf("Node[%d]", i))
-		fmt.Println(fmt.Sprintf(" %s(%d,%d)", nodes[i].op, nodes[i].factor[0], nodes[i].factor[1]))
-		res += nodes[i].ApplyOperation()
+		fmt.Println(fmt.Sprintf("Node[%d] op: %s skipped: %b", i, nodes[i].op, skip))
+		if !skip && nodes[i].op == "mul" {
+			fmt.Println(fmt.Sprintf(" %s(%d,%d)", nodes[i].op, nodes[i].factor[0], nodes[i].factor[1]))
+			res += nodes[i].ApplyOperation()
+		} else if nodes[i].op == "do()" {
+			skip = false
+		} else if nodes[i].op == "don't()" {
+			skip = true
+		}
 	}
 
 	return res
@@ -55,12 +62,15 @@ type Node struct {
 }
 
 func (n Node) ApplyOperation() int {
-	// currently implement base case that simple supports mul as operand
-	res := 1
-	for i := 0; i < len(n.factor); i++ {
-		res *= n.factor[i]
+	if n.op == "mul" {
+		// currently implement base case that simple supports mul as operand
+		res := 1
+		for i := 0; i < len(n.factor); i++ {
+			res *= n.factor[i]
+		}
+		return res
 	}
-	return res
+	return 0
 }
 
 type parser struct {
@@ -125,4 +135,11 @@ const (
 	comm = ','
 	zero = '0'
 	nine = '9'
+
+	// part 2
+	d  = 'd'
+	o  = 'o'
+	n  = 'n'
+	t  = 't'
+	ap = '\''
 )
