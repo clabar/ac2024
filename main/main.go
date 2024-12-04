@@ -32,6 +32,7 @@ func main() {
 	fmt.Println(d3.ParseAll(d3.Input))
 
 	//fmt.Println(d4.SearchForXmas(testInput4))
+	fmt.Println(d4.SearchForXmas2(d4.Input4))
 	fmt.Println(d4.SearchForXmas(d4.Input4))
 }
 
