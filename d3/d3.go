@@ -17,7 +17,7 @@ func ParseAll(input string) int {
 	var p parser
 	nodes := make([]Node, 0)
 	p.Init()
-	fmt.Println("input: ", input)
+	// fmt.Println("input: ", input)
 	for _, c := range input {
 		if p.IsComplete() {
 			node, err := p.GetNode()
@@ -41,9 +41,9 @@ func ParseAll(input string) int {
 	res := 0
 	skip := false
 	for i := 0; i < len(nodes); i++ {
-		fmt.Println(fmt.Sprintf("Node[%d] op: %s skipped: %b", i, nodes[i].op, skip))
+		// fmt.Println(fmt.Sprintf("Node[%d] op: %s skipped: %b", i, nodes[i].op, skip))
 		if !skip && nodes[i].op == "mul" {
-			fmt.Println(fmt.Sprintf(" %s(%d,%d)", nodes[i].op, nodes[i].factor[0], nodes[i].factor[1]))
+			// fmt.Println(fmt.Sprintf(" %s(%d,%d)", nodes[i].op, nodes[i].factor[0], nodes[i].factor[1]))
 			res += nodes[i].ApplyOperation()
 		} else if nodes[i].op == "do()" {
 			skip = false
