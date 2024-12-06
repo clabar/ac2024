@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"bartoli.no/d5"
+	"bartoli.no/d6"
 )
 
 func main() {
@@ -33,7 +34,20 @@ func main() {
 	// fmt.Println(d4.SearchForXmas(d4.Input4))
 
 	fmt.Println(d5.D5(d5.Input)) // 6949
+	//fmt.Println(d6.D6(inputD6))
+	fmt.Println(d6.D6(d6.Input))
 }
+
+var inputD6 = `....#.....
+.........#
+..........
+..#.......
+.......#..
+..........
+.#..^.....
+........#.
+#.........
+......#...`
 
 var tInput5 = `47|53
 97|13
