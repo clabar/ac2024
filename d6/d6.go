@@ -33,9 +33,7 @@ func D6(input string) int {
 	for {
 		nextPos := world.NextPos()
 		steps++
-		if steps%100 == 0 {
-			printWorld(world)
-		}
+
 		// printWorld(world)
 		if nextPos.OutOfBound(maxX, maxY, 0, 0) {
 			return world.Steps()
@@ -48,7 +46,7 @@ func D6(input string) int {
 
 func printWorld(w World) {
 	fmt.Println(w)
-	time.Sleep(33 * time.Millisecond)
+	time.Sleep(66 * time.Millisecond)
 }
 
 const (

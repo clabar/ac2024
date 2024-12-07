@@ -5,10 +5,6 @@ import (
 )
 
 type World interface {
-	Up() *Point
-	Down() *Point
-	Left() *Point
-	Right() *Point
 	Add(p *Point)
 	NextPos() *Point
 	String() string
@@ -20,8 +16,10 @@ func New() World {
 	var world = w{
 		index:         map[string]*Point{},
 		visited:       map[string]*Point{},
-		turningPoints: map[string]*Point{},
 		obstacles:     map[string]*Point{},
+		turningPoints: map[string]*Point{},
+		hashes:        map[string]*Point{},
+		v2:            map[string]int32{},
 	}
 	return &world
 }
@@ -55,8 +53,12 @@ func (p *Point) coor() string {
 type w struct {
 	index         map[string]*Point
 	visited       map[string]*Point
-	currentPos    *Point
+	hashes        map[string]*Point
 	turningPoints map[string]*Point
+	currentPos    *Point
+	start         *Point
+	pos2          *Point
+	v2            map[string]int32
 	obstacles     map[string]*Point
 }
 
@@ -66,57 +68,49 @@ func (wrld *w) Add(p *Point) {
 			panic("too many start pos")
 		}
 		wrld.currentPos = p
+		wrld.start = p
 		wrld.visited[p.coor()] = p
+	}
+	if p.val == obstacle {
+		wrld.hashes[p.coor()] = p
 	}
 	wrld.index[p.coor()] = p
 }
 
-func (wrld *w) Up() *Point {
+func (p *Point) Up() *Point {
 	u := &Point{
-		x: wrld.currentPos.x,
-		y: wrld.currentPos.y - 1,
+		x:   p.x,
+		y:   p.y - 1,
+		val: up,
 	}
-	newPos, found := wrld.index[u.coor()]
-	if !found {
-		return u
-	}
-	return newPos
+	return u
 }
 
-func (wrld *w) Down() *Point {
+func (p *Point) Down() *Point {
 	dw := &Point{
-		x: wrld.currentPos.x,
-		y: wrld.currentPos.y + 1,
+		x:   p.x,
+		y:   p.y + 1,
+		val: down,
 	}
-	newPos, found := wrld.index[dw.coor()]
-	if !found {
-		return dw
-	}
-	return newPos
+	return dw
 }
 
-func (wrld *w) Left() *Point {
+func (p *Point) Left() *Point {
 	l := &Point{
-		x: wrld.currentPos.x - 1,
-		y: wrld.currentPos.y,
+		x:   p.x - 1,
+		y:   p.y,
+		val: left,
 	}
-	newPos, found := wrld.index[l.coor()]
-	if !found {
-		return l
-	}
-	return newPos
+	return l
 }
 
-func (wrld *w) Right() *Point {
+func (p *Point) Right() *Point {
 	r := &Point{
-		x: wrld.currentPos.x + 1,
-		y: wrld.currentPos.y,
+		x:   p.x + 1,
+		y:   p.y,
+		val: right,
 	}
-	newPos, found := wrld.index[r.coor()]
-	if !found {
-		return r
-	}
-	return newPos
+	return r
 }
 
 func (wrld *w) String() string {
@@ -130,6 +124,9 @@ func (wrld *w) String() string {
 	}
 	for _, point := range wrld.obstacles {
 		wInt[point.y][point.x] = 'O'
+	}
+	if wrld.pos2 != nil {
+		wInt[wrld.pos2.y][wrld.pos2.x] = '*'
 	}
 	for _, vals := range wInt {
 		for _, val := range vals {
@@ -146,13 +143,13 @@ func (wrld *w) NextPos() *Point {
 	cursor := wrld.currentPos.val
 	switch cursor {
 	case up:
-		candidate = wrld.Up()
+		candidate = wrld.currentPos.Up()
 	case down:
-		candidate = wrld.Down()
+		candidate = wrld.currentPos.Down()
 	case left:
-		candidate = wrld.Left()
+		candidate = wrld.currentPos.Left()
 	case right:
-		candidate = wrld.Right()
+		candidate = wrld.currentPos.Right()
 	default:
 		panic(fmt.Sprintf("Invalid direction %c", wrld.currentPos.val))
 	}
@@ -161,6 +158,7 @@ func (wrld *w) NextPos() *Point {
 		wrld.index[wrld.currentPos.coor()].val = passed
 		return candidate
 	}
+	candidate = wrld.index[candidate.coor()]
 	if candidate.val == obstacle {
 		// rotate 90 deg clockwise
 		wrld.rotate()
@@ -235,62 +233,60 @@ func rotate(curr int32) int32 {
 
 func (wrld *w) addArtificialObstacle() {
 	if !wrld.isTurningPoint() {
-		dir := rotate(wrld.currentPos.val)
-		if dir == up {
-			for i := wrld.currentPos.y; i >= 0; i-- {
-				p := Point{x: wrld.currentPos.x, y: i}
-				if wrld.index[p.coor()].val == obstacle {
-					prec := Point{x: wrld.currentPos.x, y: i + 1}
-					_, found := wrld.turningPoints[prec.coor()]
-					if found {
-						coor := fmt.Sprintf("%d,%d", wrld.currentPos.x-1, wrld.currentPos.y)
-						wrld.obstacles[coor] = wrld.index[coor]
-						break
-					}
-				}
-			}
+		p := &Point{
+			x:   wrld.currentPos.x,
+			y:   wrld.currentPos.y,
+			val: rotate(wrld.currentPos.val),
 		}
-		if dir == down {
-			for i := wrld.currentPos.y; i < maxY; i++ {
-				p := Point{x: wrld.currentPos.x, y: i}
-				if wrld.index[p.coor()].val == obstacle {
-					prec := Point{x: wrld.currentPos.x, y: i - 1}
-					_, found := wrld.turningPoints[prec.coor()]
-					if found {
-						coor := fmt.Sprintf("%d,%d", wrld.currentPos.x+1, wrld.currentPos.y)
-						wrld.obstacles[coor] = wrld.index[coor]
-						break
-					}
-				}
-			}
-		}
-		if dir == left {
-			for i := wrld.currentPos.x; i >= 0; i-- {
-				p := Point{x: i, y: wrld.currentPos.y}
-				if wrld.index[p.coor()].val == obstacle {
-					prec := Point{x: i + 1, y: wrld.currentPos.y}
-					_, found := wrld.turningPoints[prec.coor()]
-					if found {
-						coor := fmt.Sprintf("%d,%d", wrld.currentPos.x, wrld.currentPos.y+1)
-						wrld.obstacles[coor] = wrld.index[coor]
-						break
-					}
-				}
-			}
-		}
-		if dir == right {
-			for i := wrld.currentPos.x; i < maxX; i++ {
-				p := Point{x: i, y: wrld.currentPos.y}
-				if wrld.index[p.coor()].val == obstacle {
-					prec := Point{x: i - 1, y: wrld.currentPos.y}
-					_, found := wrld.turningPoints[prec.coor()]
-					if found {
-						coor := fmt.Sprintf("%d,%d", wrld.currentPos.x, wrld.currentPos.y-1)
-						wrld.obstacles[coor] = wrld.index[coor]
-						break
-					}
-				}
-			}
+		wrld.v2 = map[string]int32{}
+		currentCandidate = *p
+		coor := searchLoop(wrld, p)
+		if coor != "" && coor != wrld.start.coor() {
+			wrld.obstacles[coor] = wrld.index[coor]
 		}
 	}
+}
+
+func (wrld *w) isObstacle(p *Point) bool {
+	_, found := wrld.hashes[p.coor()]
+	return found
+}
+
+var currentCandidate Point
+
+func searchLoop(world *w, current *Point) string {
+	var nextPoint *Point
+	switch current.val {
+	case up:
+		nextPoint = current.Up()
+	case down:
+		nextPoint = current.Down()
+	case left:
+		nextPoint = current.Left()
+	case right:
+		nextPoint = current.Right()
+	default:
+		panic("X" + string(current.val))
+	}
+	p, found := world.v2[nextPoint.coor()]
+	//fmt.Println(fmt.Sprintf("Found %s, dir: %c, %c", nextPoint.coor(), p, nextPoint.val))
+	if found && p == nextPoint.val || currentCandidate.coor() == nextPoint.coor() {
+		fmt.Println(fmt.Sprintf("found %v", nextPoint.coor()))
+		return nextPoint.coor()
+	} else {
+		if nextPoint.OutOfBound(maxX, maxY, 0, 0) {
+			//world.pos2 = current
+			//printWorld(world)
+			//fmt.Println("~~~~~" + string(current.val) + "~~~~~")
+			return ""
+		}
+		world.v2[nextPoint.coor()] = nextPoint.val
+		//fmt.Println(fmt.Sprintf("visited %v", v2))
+		if world.isObstacle(nextPoint) {
+			current.val = rotate(current.val)
+			return searchLoop(world, current)
+		}
+		return searchLoop(world, nextPoint)
+	}
+	return ""
 }
