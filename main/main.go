@@ -38,6 +38,7 @@ func main() {
 
 	fmt.Println(d7.D7(inputD7))
 	fmt.Println(d7.D7(d7.Input))
+	//fmt.Println(d7.Conc(48, 6))
 }
 
 var inputD7 = `190: 10 19
