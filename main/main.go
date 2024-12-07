@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"bartoli.no/d5"
-	"bartoli.no/d6"
+	"d7"
 )
 
 func main() {
@@ -33,10 +32,23 @@ func main() {
 	// fmt.Println(d4.SearchForXmas2(d4.Input4))
 	// fmt.Println(d4.SearchForXmas(d4.Input4))
 
-	fmt.Println(d5.D5(d5.Input)) // 6949
+	//fmt.Println(d5.D5(d5.Input)) // 6949
 	//fmt.Println(d6.D6(inputD6))
-	fmt.Println(d6.D6(d6.Input))
+	//fmt.Println(d6.D6(d6.Input))
+
+	fmt.Println(d7.D7(inputD7))
+	fmt.Println(d7.D7(d7.Input))
 }
+
+var inputD7 = `190: 10 19
+3267: 81 40 27
+83: 17 5
+156: 15 6
+7290: 6 8 6 15
+161011: 16 10 13
+192: 17 8 14
+21037: 9 7 18 13
+292: 11 6 16 20`
 
 var inputD6 = `....#.....
 .........#
