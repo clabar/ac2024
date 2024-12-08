@@ -45,8 +45,11 @@ func D6(input string) int {
 }
 
 func printWorld(w World) {
+	//cmd := exec.Command("clear") //Linux example, its tested
+	//cmd.Stdout = os.Stdout
+	//cmd.Run()
 	fmt.Println(w)
-	time.Sleep(66 * time.Millisecond)
+	time.Sleep(33 * time.Millisecond)
 }
 
 const (

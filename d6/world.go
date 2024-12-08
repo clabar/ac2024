@@ -113,6 +113,23 @@ func (p *Point) Right() *Point {
 	return r
 }
 
+func (p *Point) Next() *Point {
+	var nextPoint *Point
+	switch p.val {
+	case up:
+		nextPoint = p.Up()
+	case down:
+		nextPoint = p.Down()
+	case left:
+		nextPoint = p.Left()
+	case right:
+		nextPoint = p.Right()
+	default:
+		panic("X" + string(p.val))
+	}
+	return nextPoint
+}
+
 func (wrld *w) String() string {
 	res := ""
 	var wInt = make([][]int32, maxY)
@@ -130,7 +147,13 @@ func (wrld *w) String() string {
 	}
 	for _, vals := range wInt {
 		for _, val := range vals {
-			res = res + string(val)
+			if val == '*' || val == 'O' {
+				res = res + colorRed + string(val) + colorReset
+			} else if val == '*' || val == vert || val == or || val == turn {
+				res = res + colorYellow + string(val) + colorReset
+			} else {
+				res = res + string(val)
+			}
 		}
 		res = res + "\n"
 	}
@@ -138,21 +161,19 @@ func (wrld *w) String() string {
 	return res
 }
 
+const (
+	colorReset  = "\033[0m"
+	colorRed    = "\033[31m"
+	colorGreen  = "\033[32m"
+	colorYellow = "\033[33m"
+	colorBlue   = "\033[34m"
+	colorPurple = "\033[35m"
+	colorCyan   = "\033[36m"
+	colorWhite  = "\033[37m"
+)
+
 func (wrld *w) NextPos() *Point {
-	var candidate *Point
-	cursor := wrld.currentPos.val
-	switch cursor {
-	case up:
-		candidate = wrld.currentPos.Up()
-	case down:
-		candidate = wrld.currentPos.Down()
-	case left:
-		candidate = wrld.currentPos.Left()
-	case right:
-		candidate = wrld.currentPos.Right()
-	default:
-		panic(fmt.Sprintf("Invalid direction %c", wrld.currentPos.val))
-	}
+	candidate := wrld.currentPos.Next()
 	if candidate.OutOfBound(maxX, maxY, 0, 0) {
 		// managed to exit the filed EOG
 		wrld.index[wrld.currentPos.coor()].val = passed
@@ -165,7 +186,7 @@ func (wrld *w) NextPos() *Point {
 		return wrld.NextPos()
 	}
 	// candidate is a valid place to move to
-	wrld.updatePos(candidate, cursor)
+	wrld.updatePos(candidate, wrld.currentPos.val)
 	wrld.addArtificialObstacle()
 	return candidate
 }
@@ -241,8 +262,8 @@ func (wrld *w) addArtificialObstacle() {
 		wrld.v2 = map[string]int32{}
 		currentCandidate = *p
 		coor := searchLoop(wrld, p)
-		if coor != "" && coor != wrld.start.coor() {
-			wrld.obstacles[coor] = wrld.index[coor]
+		if coor != "" {
+			wrld.obstacles[wrld.currentPos.Next().coor()] = wrld.index[wrld.currentPos.Next().coor()]
 		}
 	}
 }
@@ -255,29 +276,16 @@ func (wrld *w) isObstacle(p *Point) bool {
 var currentCandidate Point
 
 func searchLoop(world *w, current *Point) string {
-	var nextPoint *Point
-	switch current.val {
-	case up:
-		nextPoint = current.Up()
-	case down:
-		nextPoint = current.Down()
-	case left:
-		nextPoint = current.Left()
-	case right:
-		nextPoint = current.Right()
-	default:
-		panic("X" + string(current.val))
-	}
+	//	world.pos2 = current
+	//	printWorld(world)
+	nextPoint := current.Next()
 	p, found := world.v2[nextPoint.coor()]
 	//fmt.Println(fmt.Sprintf("Found %s, dir: %c, %c", nextPoint.coor(), p, nextPoint.val))
 	if found && p == nextPoint.val || currentCandidate.coor() == nextPoint.coor() {
-		fmt.Println(fmt.Sprintf("found %v", nextPoint.coor()))
+		//fmt.Println(fmt.Sprintf("found %v", nextPoint.coor()))
 		return nextPoint.coor()
 	} else {
 		if nextPoint.OutOfBound(maxX, maxY, 0, 0) {
-			//world.pos2 = current
-			//printWorld(world)
-			//fmt.Println("~~~~~" + string(current.val) + "~~~~~")
 			return ""
 		}
 		world.v2[nextPoint.coor()] = nextPoint.val
