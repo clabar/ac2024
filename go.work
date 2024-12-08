@@ -1,6 +1,7 @@
 go 1.22.3
 use (
 	main
+	utils
 	d1
 	d2
 	d3
@@ -8,4 +9,5 @@ use (
 	d5
 	d6
 	d7
+	d8
 )

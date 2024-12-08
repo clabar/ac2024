@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"bartoli.no/d6"
+	"d8"
 )
 
 func main() {
@@ -35,11 +35,26 @@ func main() {
 	//fmt.Println(d5.D5(d5.Input)) // 6949
 
 	//fmt.Println(d6.D6(inputD6))
-	fmt.Println(d6.D6(d6.Input))
+	//fmt.Println(d6.D6(d6.Input))
 
 	//fmt.Println(d7.D7(inputD7))
 	//fmt.Println(d7.D7(d7.Input))
+
+	fmt.Println(d8.D8(d8.Input))
 }
+
+var inputD8 = `............
+........0...
+.....0......
+.......0....
+....0.......
+......A.....
+............
+............
+........A...
+.........A..
+............
+............`
 
 var inputD7 = `190: 10 19
 3267: 81 40 27
