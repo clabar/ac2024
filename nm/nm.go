@@ -3,6 +3,7 @@ package nm
 import (
 	"fmt"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/dominikbraun/graph"
@@ -23,17 +24,25 @@ func CreateGraph() {
 	addEdges(g)
 
 	fmt.Println("print")
-
+	var wg sync.WaitGroup
 	for i := 0; i < len(citta); i++ {
-		println("Computing routes from ", citta[i].Name)
-		time.Sleep(3 * time.Second)
-		for j := i + 1; j < len(citta); j++ {
-			path, _ := graph.ShortestPath(g, citta[i].Name, citta[j].Name)
-			l := len(path)
-			mustAddFullDuplexEdge(allDistances, path[0], path[l-1], l)
-			fmt.Println(fmt.Sprintf("from %s to %s len:%d", path[0], path[len(path)-1], len(path)))
-		}
+		wg.Add(1)
+		go func(ind int) {
+			defer wg.Done()
+			fmt.Println(fmt.Sprintf("Index = %d computing for %s\n", ind, citta[ind].Name))
+			s := "Routes from " + citta[ind].Name
+			for j := ind + 1; j < len(citta); j++ {
+				path, _ := graph.ShortestPath(g, citta[ind].Name, citta[j].Name)
+				l := len(path) - 1
+				mustAddFullDuplexEdge(allDistances, path[0], path[l], l)
+				s += fmt.Sprintf("from %s to %s len:%d \n", path[0], path[l], l)
+				time.Sleep(1 * time.Millisecond)
+			}
+			fmt.Println(s + "\n")
+		}(i)
 	}
+	wg.Wait()
+	fmt.Println("waiting for all to complete")
 	//path, _ := graph.ShortestPath(g, Oslo.Name, Bergen.Name)
 	//fmt.Println(path)
 
@@ -165,41 +174,43 @@ func addEdges(g graph.Graph[string, City]) {
 	mustAddCarEdge(g, Kirkenes.Name, Vadsø.Name)
 	mustAddCarEdge(g, Vardø.Name, Vadsø.Name)
 
-	mustAddNaval(g, Stavanger.Name, Osøyro.Name)
-	mustAddNaval(g, Askøy.Name, Florø.Name)
-	mustAddNaval(g, Måløy.Name, Florø.Name)
-	mustAddNaval(g, Ålesund.Name, Molde.Name)
-	mustAddNaval(g, Hamar.Name, Gjøvik.Name)
-	mustAddNaval(g, Røst.Name, Å.Name)
-	mustAddNaval(g, Svolvær.Name, Å.Name)
-	mustAddNaval(g, Svolvær.Name, Harstad.Name)
-	mustAddNaval(g, Finnsnes.Name, Harstad.Name)
-	mustAddNaval(g, Finnsnes.Name, Tromsø.Name)
-	mustAddNaval(g, Alta.Name, Hammerfest.Name)
-	mustAddNaval(g, Stavanger.Name, Haugesund.Name)
-	mustAddNaval(g, Lyngør.Name, Risør.Name)
+	mustAddNaval(g, Haugesund.Name, Osøyro.Name, 2)
+	mustAddNaval(g, Askøy.Name, Florø.Name, 3)
+	mustAddNaval(g, Måløy.Name, Florø.Name, 1)
+	mustAddNaval(g, Ålesund.Name, Molde.Name, 2)
+	mustAddNaval(g, Hamar.Name, Gjøvik.Name, 1)
+	mustAddNaval(g, Røst.Name, Å.Name, 1)
+	mustAddCarEdge(g, Svolvær.Name, Å.Name)
+	mustAddNaval(g, Svolvær.Name, Bodø.Name, 2)
+	mustAddNaval(g, Svolvær.Name, Harstad.Name, 4)
+	mustAddNaval(g, Finnsnes.Name, Harstad.Name, 2)
+	mustAddNaval(g, Finnsnes.Name, Tromsø.Name, 1)
+	mustAddNaval(g, Alta.Name, Hammerfest.Name, 2)
+	mustAddNaval(g, Stavanger.Name, Haugesund.Name, 1)
+	mustAddNaval(g, Lyngør.Name, Risør.Name, 1)
+	mustAddNaval(g, Horten.Name, Moss.Name, 1)
 
-	mustAddAirEdge(g, Oslo.Name, Trondheim.Name)
-	mustAddAirEdge(g, Oslo.Name, Tromsø.Name)
+	mustAddAirEdge(g, Oslo.Name, Trondheim.Name, 1)
+	mustAddAirEdge(g, Oslo.Name, Tromsø.Name, 2)
 
-	mustAddAirEdge(g, Stavanger.Name, Trondheim.Name)
-	mustAddAirEdge(g, Stavanger.Name, Honningsvåg.Name)
+	mustAddAirEdge(g, Stavanger.Name, Trondheim.Name, 2)
+	mustAddAirEdge(g, Stavanger.Name, Honningsvåg.Name, 3)
 
-	mustAddAirEdge(g, Bergen.Name, Trondheim.Name)
-	mustAddAirEdge(g, Bergen.Name, Tromsø.Name)
+	mustAddAirEdge(g, Bergen.Name, Trondheim.Name, 1)
+	mustAddAirEdge(g, Bergen.Name, Tromsø.Name, 3)
 
-	mustAddAirEdge(g, Trondheim.Name, Oslo.Name)
-	mustAddAirEdge(g, Trondheim.Name, Stavanger.Name)
-	mustAddAirEdge(g, Trondheim.Name, Bergen.Name)
-	mustAddAirEdge(g, Trondheim.Name, Honningsvåg.Name)
+	mustAddAirEdge(g, Trondheim.Name, Oslo.Name, 2)
+	mustAddAirEdge(g, Trondheim.Name, Stavanger.Name, 1)
+	mustAddAirEdge(g, Trondheim.Name, Bergen.Name, 1)
+	mustAddAirEdge(g, Trondheim.Name, Honningsvåg.Name, 2)
 
-	mustAddAirEdge(g, Tromsø.Name, Oslo.Name)
-	mustAddAirEdge(g, Tromsø.Name, Stavanger.Name)
-	mustAddAirEdge(g, Tromsø.Name, Bergen.Name)
+	mustAddAirEdge(g, Tromsø.Name, Oslo.Name, 3)
+	mustAddAirEdge(g, Tromsø.Name, Stavanger.Name, 2)
+	mustAddAirEdge(g, Tromsø.Name, Bergen.Name, 2)
 
-	mustAddAirEdge(g, Honningsvåg.Name, Trondheim.Name)
-	mustAddAirEdge(g, Honningsvåg.Name, Stavanger.Name)
-	mustAddAirEdge(g, Honningsvåg.Name, Bergen.Name)
+	mustAddAirEdge(g, Honningsvåg.Name, Trondheim.Name, 2)
+	mustAddAirEdge(g, Honningsvåg.Name, Stavanger.Name, 3)
+	mustAddAirEdge(g, Honningsvåg.Name, Bergen.Name, 3)
 
 }
 
@@ -218,19 +229,19 @@ func mustAddFullDuplexEdge(g graph.Graph[string, City], from, to string, weight 
 	}
 }
 
-func mustAddAirEdge(g graph.Graph[string, City], from, to string) {
-	err := g.AddEdge(from, to, graph.EdgeWeight(airWeight), graph.EdgeAttribute("label", "air-connection"))
+func mustAddAirEdge(g graph.Graph[string, City], from, to string, multiplier int) {
+	err := g.AddEdge(from, to, graph.EdgeWeight(multiplier*airWeight), graph.EdgeAttribute("label", "air-connection"))
 	if err != nil {
 		panic(fmt.Sprintf("impossibe to create edge %s->%s: %s", from, to, err))
 	}
 }
 
-func mustAddNaval(g graph.Graph[string, City], from, to string) {
-	err := g.AddEdge(from, to, graph.EdgeWeight(navalWeight), graph.EdgeAttribute("label", "sea-connection"))
+func mustAddNaval(g graph.Graph[string, City], from, to string, multiplier int) {
+	err := g.AddEdge(from, to, graph.EdgeWeight(multiplier*navalWeight), graph.EdgeAttribute("label", "sea-connection"))
 	if err != nil {
 		panic(fmt.Sprintf("impossibe to create edge %s->%s: %s", from, to, err))
 	}
-	err = g.AddEdge(to, from, graph.EdgeWeight(navalWeight), graph.EdgeAttribute("label", "sea-connection"))
+	err = g.AddEdge(to, from, graph.EdgeWeight(multiplier*navalWeight), graph.EdgeAttribute("label", "sea-connection"))
 	if err != nil {
 		panic(fmt.Sprintf("impossibe to create edge %s->%s: %s", from, to, err))
 	}
