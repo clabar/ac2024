@@ -18,6 +18,17 @@ func LoadInput(input string) [][]int32 {
 	return res
 }
 
+func Print(world [][]int32) {
+	var w string
+	for i := 0; i < len(world); i++ {
+		for j := 0; j < len(world[i]); j++ {
+			w = fmt.Sprintf("%s%c", w, world[i][j])
+		}
+		w = fmt.Sprintf("%s\n", w)
+	}
+	fmt.Println(w)
+}
+
 func NewPoint(x, y int) Point {
 	return Point{
 		x: x,

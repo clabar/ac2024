@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
-	"d8"
+	"nm"
 )
 
 func main() {
@@ -40,7 +39,10 @@ func main() {
 	//fmt.Println(d7.D7(inputD7))
 	//fmt.Println(d7.D7(d7.Input))
 
-	fmt.Println(d8.D8(d8.Input))
+	//fmt.Println(d8.D8(d8.Input))
+	//fmt.Println(d8.D8P2(inputD8))
+
+	nm.CreateGraph()
 }
 
 var inputD8 = `............
